@@ -26,6 +26,10 @@ Clone your fork, then install the dev dependencies:
 composer install
 ```
 
+PHPStan is temporarily constrained below 2.3.6 because Pest's type-coverage
+plugin still requires the removed `AnalyserResult::getCollectedData()` method.
+Keep this constraint until the supported plugin versions handle the new API.
+
 ## Lint
 
 Lint your code:
