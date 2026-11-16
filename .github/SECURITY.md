@@ -8,4 +8,4 @@ Only the latest major version receives security fixes.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within :package_name, please send an email to :author_name at :author_email. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within Filament Job Action, please send an email to Patrick Henninger at privat@skyraptor.eu. All security vulnerabilities will be promptly addressed.

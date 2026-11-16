@@ -1,1 +1,1 @@
-<div>Skeleton placeholder view.</div>
+<div>FilamentJobAction placeholder view.</div>
