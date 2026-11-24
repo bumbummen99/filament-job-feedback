@@ -1,6 +1,6 @@
 // https://aka.ms/devcontainer.json
 {
-    "name": "Laravel Package FilamentJobAction (PHP 8.5)",
+    "name": "Laravel Package FilamentJobFeedback (PHP 8.5)",
     "build": {
         "dockerfile": "../Dockerfile",
         "context": "..",

@@ -1,13 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "skyraptor/filament-job-action",
+    "name": "skyraptor/filament-job-feedback",
     "description": "Filament PHP Action to poll queued workloads",
     "keywords": [
         "laravel",
         "skyraptor",
-        "filament-job-action"
+        "filament-job-feedback"
     ],
-    "homepage": "https://github.com/skyraptor/filament-job-action",
+    "homepage": "https://github.com/skyraptor/filament-job-feedback",
     "license": "AGPL-3.0-only",
     "authors": [
         {
@@ -33,12 +33,12 @@
     },
     "autoload": {
         "psr-4": {
-            "SkyRaptor\\FilamentJobAction\\": "src/"
+            "SkyRaptor\\FilamentJobFeedback\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SkyRaptor\\FilamentJobAction\\Tests\\": "tests/",
+            "SkyRaptor\\FilamentJobFeedback\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/",
             "Workbench\\Database\\Factories\\": "workbench/database/factories/",
             "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
@@ -88,7 +88,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "SkyRaptor\\FilamentJobAction\\FilamentJobActionServiceProvider"
+                "SkyRaptor\\FilamentJobFeedback\\FilamentJobFeedbackServiceProvider"
             ]
         }
     },
