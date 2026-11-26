@@ -242,9 +242,9 @@ test.describe('with a stale claim', () => {
         await expect(warning).toContainText('Replacing a stale run');
         await expect(warning).toContainText('Starting a new run does not cancel the original job.');
         await expect(warning).toHaveCSS('border-inline-start-width', '3px');
-        await warning.evaluate(element => {
-            element.style.setProperty('--warning-700', 'rgb(160, 90, 0)');
-            element.style.setProperty('--warning-300', 'rgb(160, 90, 0)');
+        // Livewire polls can restore the banner's inline style between assertions.
+        await page.addStyleTag({
+            content: '[role="note"] { --warning-700: rgb(160, 90, 0); --warning-300: rgb(160, 90, 0); }',
         });
         await expect(warning.getByText('Replacing a stale run', { exact: true })).toHaveCSS('color', 'rgb(160, 90, 0)');
         await expect(warning.locator('svg')).toHaveCSS('color', 'rgb(160, 90, 0)');
