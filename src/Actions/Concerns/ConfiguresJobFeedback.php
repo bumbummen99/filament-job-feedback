@@ -10,7 +10,6 @@ use Filament\Actions\Action;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\HtmlString;
 use InvalidArgumentException;
 use LogicException;
@@ -112,7 +111,7 @@ trait ConfiguresJobFeedback
     {
         if ($this->getStaleRecoveryTrigger() !== null) {
             // Filament's attached action badge takes text, not a separate icon.
-            return "\u{26A0}\u{FE0E} ".Lang::string('filament-job-feedback::messages.stale_badge');
+            return "\u{26A0}\u{FE0E} ".__('filament-job-feedback::messages.stale_badge');
         }
 
         $badge = parent::getBadge();
@@ -170,14 +169,14 @@ trait ConfiguresJobFeedback
     {
         return $this->getStaleJobReplacement() === null
             ? parent::getModalSubmitActionLabel()
-            : Lang::string('filament-job-feedback::messages.start_new_run');
+            : __('filament-job-feedback::messages.start_new_run');
     }
 
     public function getModalCancelActionLabel(): string
     {
         return $this->getStaleJobReplacement() === null
             ? parent::getModalCancelActionLabel()
-            : Lang::string('filament-job-feedback::messages.keep_waiting');
+            : __('filament-job-feedback::messages.keep_waiting');
     }
 
     public function getModalCancelAction(): ?Action
@@ -262,7 +261,7 @@ trait ConfiguresJobFeedback
 
         if ($this->getStaleRecoveryTrigger() !== null) {
             $attributes['data-job-feedback-stale'] = 'true';
-            $attributes['aria-description'] ??= Lang::string('filament-job-feedback::messages.stale_action_description');
+            $attributes['aria-description'] ??= __('filament-job-feedback::messages.stale_action_description');
         }
 
         if ($this->hasPendingJobFeedback(includeUndelivered: false)) {
