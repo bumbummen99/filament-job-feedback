@@ -95,11 +95,13 @@ final class FilamentJobFeedback
             }
         }
 
-        $uniqueLock = null;
-        $uniqueJob = null;
+        $uniqueness = new class
+        {
+            public ?UniqueLock $acquiredLock = null;
+        };
 
         try {
-            $claim = $this->executions->claim($key, function () use ($command, &$uniqueLock, &$uniqueJob): ?ShouldQueue {
+            $claim = $this->executions->claim($key, function () use ($command, $uniqueness): ?ShouldQueue {
                 if ($command instanceof ShouldBeUnique) {
                     $uniqueLock = new UniqueLock(app(Repository::class));
 
@@ -107,18 +109,18 @@ final class FilamentJobFeedback
                         return null;
                     }
 
-                    $uniqueJob = $command;
+                    $uniqueness->acquiredLock = $uniqueLock;
                     $this->addUniqueJobInformationToContext($command);
                 }
 
                 return $command;
             }, $replaceStale, $expectedAttempt);
         } catch (Throwable $exception) {
-            if ($uniqueJob !== null) {
+            if ($uniqueness->acquiredLock !== null && $command instanceof ShouldBeUnique) {
                 try {
-                    $uniqueLock?->release($uniqueJob);
+                    $uniqueness->acquiredLock->release($command);
                 } finally {
-                    $this->removeUniqueJobInformationFromContext($uniqueJob);
+                    $this->removeUniqueJobInformationFromContext($command);
                 }
             }
 
@@ -133,7 +135,12 @@ final class FilamentJobFeedback
         [$execution, $claimedCommand] = $claim;
 
         if ($claimedCommand !== null) {
-            $this->dispatchClaimedJob($execution, $claimedCommand, $uniqueLock, $uniqueJob);
+            $this->dispatchClaimedJob(
+                $execution,
+                $claimedCommand,
+                $uniqueness->acquiredLock,
+                $uniqueness->acquiredLock !== null && $command instanceof ShouldBeUnique ? $command : null,
+            );
         }
 
         return $execution->id;

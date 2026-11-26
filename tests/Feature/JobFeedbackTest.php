@@ -2,14 +2,19 @@
 
 declare(strict_types=1);
 
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobTimedOut;
 use Illuminate\Queue\InvalidPayloadException;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use SkyRaptor\FilamentJobFeedback\CacheExecutionStore;
 use SkyRaptor\FilamentJobFeedback\Contracts\ShouldBeDeduplicated;
 use SkyRaptor\FilamentJobFeedback\ExecutionStatus;
 use SkyRaptor\FilamentJobFeedback\FilamentJobFeedback;
@@ -52,6 +57,22 @@ it('joins an active feedback run even after Laravel releases an until-processing
     $this->artisan('queue:work', ['--once' => true])->assertSuccessful();
     expect($feedback->find($payload['uuid'])?->status)->toBe(ExecutionStatus::Completed)
         ->and(DB::table('jobs')->count())->toBe(0);
+});
+
+it('releases native uniqueness when saving a feedback claim fails before dispatch', function (): void {
+    $this->useDatabaseQueueForFeedback();
+    config(['cache.stores.unique-jobs' => ['driver' => 'array']]);
+
+    $cache = Mockery::mock(Repository::class, [new ArrayStore])->makePartial();
+    $cache->shouldReceive('forever')->once()->andReturnFalse();
+    $feedback = new FilamentJobFeedback(new CacheExecutionStore($cache), app(Dispatcher::class));
+    $job = fn (): UniqueFeedbackJob => new UniqueFeedbackJob;
+
+    expect(fn () => $feedback->start($job))->toThrow(RuntimeException::class, 'Unable to save the job feedback execution.');
+    expect(Context::hasHidden('laravel_unique_job_key'))->toBeFalse()
+        ->and(DB::table('jobs')->count())->toBe(0);
+    expect(app(FilamentJobFeedback::class)->start($job))->not->toBeNull()
+        ->and(DB::table('jobs')->count())->toBe(1);
 });
 
 it('joins a contract job dispatched normally without changing ordinary dispatch behavior', function (): void {
