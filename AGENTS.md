@@ -4,13 +4,11 @@ This repository is a Laravel package. Keep the package focused, idiomatic, and e
 
 ## Package Concept
 
-This package tries to simplify scenarios where you need to run a queued Job but want to receive feedback about its state, progress and result in Filament PHP.
-
-Its responsibility is to queue the Job and provide methods that allow to react to the status, progress and result of the Job to allow simple feedback to the frontend.
+This package dispatches queued Laravel jobs from Filament actions and lets the UI react to their lifecycle.
 
 ### Job Monitoring
 
-The package must be able to monitor the lifecycle and progress of dispatched Jobs.
+The package monitors enqueue, processing, retries, completion, and failure.
 
 Monitoring should be implemented in a dependency-free manner wherever possible. Ideally, Jobs should not require modifications or additional dependencies to be monitored.
 
@@ -26,17 +24,17 @@ The package must provide the following guarantees to ensure reliable job trackin
 
 - Jobs triggered from different browser tabs or sessions must never interfere with each other.
 - Each independent Job execution must have its own tracking context.
-- Status, progress and results must always be associated with the correct Job execution.
+- Lifecycle updates must always be associated with the correct Job execution.
 
 #### Logical Deduplication
 
-Components must provide a way to define when multiple Job requests are considered logically identical.
+Jobs opt into feedback deduplication with `ShouldBeDeduplicated`. Matching uses the job class by default; jobs can define `deduplicationId()` to distinguish runs of the same class.
 
 When a logically identical Job is already queued or processing:
 
 - No additional Job must be dispatched.
 - The new request must attach to the existing Job execution and inherit its tracking context.
-- All attached requests must receive the same lifecycle updates, progress and final result.
+- All attached requests must receive the same lifecycle updates.
 - The Job must only be dispatched once.
 
 Logical identity may be based on input data, expected results, target resources or other application-specific criteria.
@@ -49,7 +47,6 @@ There should be various fluent methods for configuring the Filament PHP Componen
 
 **General:**
 - `job()`: Provides the Job to be queued.
-- `queueUnique()` Defines the logical identity used to deduplicate active Job executions.
 - `queueIf()` Determines whether the Job should be queued.
 
 **Lifecycle:**
@@ -72,17 +69,6 @@ The `url()` method is not supported, as a `JobAction` must dispatch the Job when
 #### JobBulkAction
 
 The `JobBulkAction` is a Filament PHP Bulk Action that allows users to dispatch multiple queued Jobs and receive feedback on their execution.
-
-## Integrations
-
-Integrations may provide additional functionality to this package.
-
-### mateffy/laravel-job-progress
-
-#### Additional Methods
-
-**Lifecycle:**
-- `onJobCancelled()` Defines what to do in case the Job as been cancelled.
 
 ## Package Conventions
 

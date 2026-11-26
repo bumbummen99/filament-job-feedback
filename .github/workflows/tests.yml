@@ -24,6 +24,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         php: [8.3, 8.4, 8.5]
         laravel: [12.*, 13.*]
+        filament: [4.*, 5.*]
         stability: [prefer-lowest, prefer-stable]
         include:
           - laravel: 12.*
@@ -31,7 +32,7 @@ jobs:
           - laravel: 13.*
             testbench: 11.*
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - F${{ matrix.filament }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -48,7 +49,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "filament/actions:${{ matrix.filament }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress --no-scripts
           composer run prepare
 
@@ -69,3 +70,42 @@ jobs:
       - name: Test Suite (Windows)
         if: runner.os == 'Windows'
         run: vendor/bin/pest
+
+  browser:
+    name: Browser - Filament ${{ matrix.filament }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - filament: 4.*
+            laravel: 12.*
+            testbench: 10.*
+          - filament: 5.*
+            laravel: 13.*
+            testbench: 11.*
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, fileinfo, sqlite, pdo_sqlite, bcmath, intl
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "filament/actions:${{ matrix.filament }}" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-progress --no-scripts
+          npm ci
+          npx playwright install-deps chromium
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: failure()
+        with:
+          name: playwright-filament-${{ strategy.job-index }}
+          path: test-results/

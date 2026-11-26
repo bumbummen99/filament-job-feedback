@@ -1,7 +1,8 @@
 laravel: '@testbench'
 
 providers:
-  # - Workbench\App\Providers\WorkbenchServiceProvider
+  - SkyRaptor\FilamentJobFeedback\FilamentJobFeedbackServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
 
 migrations:
   - workbench/database/migrations
@@ -19,12 +20,14 @@ workbench:
     commands: true
     components: false
     factories: true
-    views: false
+    views: true
   build:
     - asset-publish
     - create-sqlite-db
-    - db-wipe
-    - migrate-fresh
+    - migrate
+    - db:seed:
+        --class: Workbench\Database\Seeders\DatabaseSeeder
+    - filament:assets
   assets:
     - laravel-assets
   sync:

@@ -32,6 +32,7 @@ it('registers the package publish groups', function (string $resource) {
         'views' => resource_path('views/vendor/filament-job-feedback'),
         'lang' => app()->langPath('vendor/filament-job-feedback'),
         'assets' => public_path('vendor/filament-job-feedback'),
+        'config' => config_path('filament-job-feedback.php'),
     };
 
     expect($paths)->toHaveCount(1)
@@ -39,5 +40,5 @@ it('registers the package publish groups', function (string $resource) {
         ->and(ServiceProvider::pathsToPublish(
             FilamentJobFeedbackServiceProvider::class,
             'filament-job-feedback',
-        ))->toHaveCount(3)->toMatchArray($paths);
-})->with(['views', 'lang', 'assets']);
+        ))->toHaveCount(4)->toMatchArray($paths);
+})->with(['views', 'lang', 'assets', 'config']);

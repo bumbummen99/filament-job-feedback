@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Workbench: Start",
+            "dependsOn": [
+                "Workbench: Serve",
+                "Workbench: Listen to queue"
+            ],
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Workbench: Serve",
+            "type": "process",
+            "command": "php",
+            "args": ["vendor/bin/testbench", "serve", "--host=127.0.0.1", "--tries=0", "--no-reload"],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "PHP_CLI_SERVER_WORKERS": "4"
+                }
+            },
+            "windows": {
+                "options": {
+                    "env": {
+                        "PHP_CLI_SERVER_WORKERS": "1"
+                    }
+                }
+            },
+            "presentation": {
+                "group": "workbench"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Workbench: Listen to queue",
+            "type": "process",
+            "command": "php",
+            "args": ["vendor/bin/testbench", "queue:listen", "--sleep=1"],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "TESTBENCH_WORKING_PATH": "${workspaceFolder}"
+                }
+            },
+            "presentation": {
+                "group": "workbench"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        }
+    ]
+}
