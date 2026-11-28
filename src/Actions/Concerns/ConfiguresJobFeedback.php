@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Illuminate\View\ComponentAttributeBag;
 use InvalidArgumentException;
 use LogicException;
 use ReflectionClass;
@@ -240,7 +241,7 @@ trait ConfiguresJobFeedback
     public function getIcon(string|BackedEnum|Htmlable|null $default = null): string|BackedEnum|Htmlable|null
     {
         return $this->hasPendingJobFeedback(includeUndelivered: false)
-            ? generate_loading_indicator_html()
+            ? generate_loading_indicator_html(new ComponentAttributeBag(['class' => 'fi-loading']))
             : parent::getIcon($default);
     }
 

@@ -28,6 +28,14 @@ it('keeps a confirmation modal mounted while polling', function (): void {
         ->assertActionMounted('confirm');
 });
 
+it('marks a pending action spinner as visible to Filament button styles', function (): void {
+    $browser = Livewire::test(JobActionHost::class)->callAction('shared');
+    $icon = $browser->instance()->getAction('shared')->getIcon();
+
+    expect($icon->toHtml())->toContain('fi-loading-indicator')->toMatch('/(?:\s)fi-loading(?:\s|")/');
+    $browser->assertActionDisabled('shared')->assertSeeHtml('aria-busy="true"');
+});
+
 it('preserves unsubmitted action form data while polling', function (): void {
     Livewire::test(JobActionHost::class)
         ->mountAction('configure')
