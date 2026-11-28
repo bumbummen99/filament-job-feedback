@@ -15,6 +15,7 @@ use Livewire\Component;
 use Livewire\Livewire;
 use LogicException;
 use SkyRaptor\FilamentJobFeedback\Actions\HasJobFeedback;
+use SkyRaptor\FilamentJobFeedback\Actions\HasSharedOperationFeedback;
 use SkyRaptor\FilamentJobFeedback\Contracts\ExecutionMonitor;
 
 class FilamentJobFeedbackServiceProvider extends ServiceProvider
@@ -91,6 +92,30 @@ class FilamentJobFeedbackServiceProvider extends ServiceProvider
                     throw new LogicException('The job feedback poller requires a Livewire root element.');
                 }
 
+                $replaceHtml($html);
+            };
+        });
+
+        Livewire::listen('render', static function (Component $component): ?Closure {
+            if (! $component instanceof HasSharedOperationFeedback) {
+                return null;
+            }
+
+            return static function (string $html, Closure $replaceHtml) use ($component): void {
+                $poller = $component->hasSharedOperationSubscriptions()
+                    ? '<template wire:key="filament-shared-operation-poller" wire:poll.2s="pollSharedOperations"></template>'
+                    : '';
+                $html = preg_replace(
+                    '~\A(?:\s+|<!--.*?-->)*\K<[a-zA-Z][\w:-]*(?:"[^"]*"|\'[^\']*\'|[^\'">])*+>~s',
+                    '$0<!--[if BLOCK]><![endif]-->'.$poller.'<!--[if ENDBLOCK]><![endif]-->',
+                    $html,
+                    1,
+                    $count,
+                );
+
+                if ($html === null || $count !== 1) {
+                    throw new LogicException('The shared operation feedback poller requires a Livewire root element.');
+                }
                 $replaceHtml($html);
             };
         });

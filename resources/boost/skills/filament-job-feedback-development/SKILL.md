@@ -36,6 +36,11 @@ Use this skill when a Laravel application needs to integrate the Filament Job Fe
 - Ordinary dispatches ignore the feedback contract. Laravel's `ShouldBeUnique` and `ShouldBeUniqueUntilProcessing` still control native uniqueness and can be used together with the feedback contract. Set `track_external_jobs` to `false` to disable observation of ordinary dispatches.
 - For deduplicated jobs safe to replace, add `allowStaleJobReplacement()`. The original trigger shows a **Stale** badge with a warning icon without changing its label or spinner. Clicking it reopens its modal with a **Replacing a stale run** callout above the modal title, using the theme’s warning color for its icon and heading. **Keep waiting** dismisses the modal without replacing the run, even during a background poll. Bulk recovery considers only its tracked stale records. Set `stale_fallback_timeout_seconds` if jobs do not declare a timeout; `stale_grace_seconds` defaults to 30. A replacement does not cancel the old job.
 - Bind `Contracts\ExecutionReconciler` only when an integration can verify the state of an exact execution. Return `ExecutionClaimState::Terminal` only when it cannot still run or retry; missing evidence is `Unknown`.
+- For externally managed shared operations, implement `Contracts\SharedOperationSource`,
+  `Actions\HasSharedOperationFeedback`, and `Actions\InteractsWithSharedOperationFeedback`.
+  The source authorizes every operation and supplies ordered cursor events and
+  current state. Subscriptions are per component, not durable across reloads;
+  callbacks are not exactly-once. This API does not alter job execution claims.
 
 - When an attempt qualifies for the **Stale** badge, a page already tracking the run shows a warning toast once. A bulk action shows one warning while it stays stale and one acceptance summary per submission or replacement. Reloading into an already-stale run does not replay the toast. Staleness does not mean failure.
 

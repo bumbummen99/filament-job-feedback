@@ -77,6 +77,30 @@ php artisan queue:work
 
 Open the page and run **Rebuild search index**. The action shows a spinner while the job is pending and sends a notification when it completes. No package resources need to be published for this example.
 
+## Shared operation feedback
+
+For work whose lifecycle is managed by another service, implement
+`Contracts\SharedOperationSource`. Its `canFollow()` must authorize the
+current user for the specified operation, `cursor()` returns the latest event
+cursor, and `read()` returns a `SharedOperationSnapshot` with its state and
+strictly increasing `SharedOperationEvent` cursors after the supplied cursor.
+When reporting a terminal state, a source must include all events committed
+before that state, using a consistent read or an equivalent ordering.
+Implement `Actions\HasSharedOperationFeedback` and use
+`Actions\InteractsWithSharedOperationFeedback` on the Livewire host. Provide
+the source via `sharedOperationSource()` and implement
+`onSharedOperationEvent()` and `onSharedOperationState()`; return `true` from
+the latter to stop following. Call `subscribeToSharedOperation($id)` before
+starting or joining work. The package polls while subscriptions exist.
+
+Subscriptions and cursors are per Livewire component and do not survive a
+reload. Authorization is checked on subscription and each poll; the source
+must reject missing or inaccessible operations, including unauthenticated
+users where appropriate. Callbacks are UI feedback, not durable side effects:
+requests or callbacks may be repeated or interrupted. Sources own their
+ordering, retention, recovery and state semantics. This API is separate from
+`JobAction` and does not change its execution, claim, retry or callback rules.
+
 ## How job feedback works
 
 - A **run** is one tracked execution of a queued job, including its retries.

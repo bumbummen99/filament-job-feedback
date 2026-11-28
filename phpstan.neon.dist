@@ -3,4 +3,5 @@ parameters:
     paths:
         - src
         - workbench/app/Filament/Pages/JobFeedbackDemo.php
+        - tests/Fixtures/SharedOperationHost.php
     tmpDir: build/phpstan
